@@ -1,0 +1,127 @@
+/* experiment.css */
+
+body {
+	background: #fff;
+	margin: 0;
+	padding: 0;
+	font-size: 22px;
+	font-family: 'Palatino Linotype', FreeSerif, serif;
+}
+
+p {
+  clear: both;
+}
+.very-small {
+  font-size: 50%;
+}
+.small {
+  font-size: 75%;
+}
+.large {
+  font-size: 125%;
+}
+.very-large {
+  font-size: 180%;
+}
+
+.fixation {
+  font-size: 300%;
+
+}
+
+img {
+	width: 50%;
+	height: auto;
+}
+
+#jspsych_target {
+	width: 500px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 120px;
+	text-align: center;
+}
+
+#jspsych_target pre {
+	text-align: left;
+}
+
+#instructions {
+	width: 500px;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: left;
+}
+
+#jspsych-single-stim-stimulus {
+width: 120px;
+height: 120px;
+margin-left: auto;
+margin-right: auto;
+margin-top: auto;
+text-align: center;
+}
+
+#jspsych-multi-stim-multi-response-stimulus {
+	display: block;
+	margin-top: 120px;
+
+}
+
+
+
+
+/* jsPsych progress bar */
+
+#jspsych-progressbar-container {
+  color: #777;
+  border-bottom: 2px solid #dedede;
+  background-color: #f0000;
+  margin-bottom: 1em;
+  text-align: center;
+  padding: 10px 10px;
+}
+#jspsych-progressbar-container s {}
+#jspsych-progressbar-outer {
+  background-color: #dedede;
+  border-radius: 50px;
+  padding: 0.5px;
+  width: 500px;
+  margin: auto;
+}
+#jspsych-progressbar-inner {
+  background-color: #aaa;
+  /* #3EB3D7; */
+  width: 0%;
+  height: 0.5em;
+  border-radius: 50px;
+}
+
+/* PLUGIN: jspsych-animation */
+
+#jspsych-animation-image {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* PLUGIN: jspsych-categorize-animation */
+
+#jspsych-categorize-animation-stimulus {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* PLUGIN: jspsych-categorize */
+
+#jspsych-categorize-stimulus {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+.feedback {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}

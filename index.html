@@ -1,0 +1,564 @@
+<!doctype html>
+<html>
+<style>
+img { margin-left: 30px; margin-right: 30px; width: 80px; height: 50px;}
+</style>
+<head>
+	<link href="experiment.css" rel="stylesheet"></link>
+	<!--script src="css/jspsych.css"></script>
+	<title>WMC</title>
+	<!--script src="img/css.png"></script-->
+	<script src="scripts/jquery-1.11.3.min.js"></script>
+  <script src="node_modules/underscore/underscore-min.js"></script>
+	<!-- script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script-->
+	<script src="jspsych.js"></script>
+  <script src="plugins/jspsych-text.js"></script>
+  <script src="plugins/jspsych-single-stim.js"></script>
+	<script src="plugins/jspsych-survey-text.js"></script>
+	<script src="plugins/jspsych-single-stim.js"></script>
+	<script src="plugins/jspsych-multi-stim-multi-response.js"</script>
+  <script src="jspsych-wordlist.js"></script>
+  <!-- script src="jspsych-call-function.js"></script>
+  <script src="parser.js"></script>
+  <script src="scripts/timeout.js"></script-->
+  <script src="lemmas.js"></script>
+  <script>
+$(document).on("keydown", function (e) {
+    if (e.which === 8 && !$(e.target).is("input, textarea")) {
+        e.preventDefault();
+    }
+});
+	</script>
+
+</head>
+<body>
+	<div id="jspsych_target"></div>
+	<div id="jspsych-multi-stim-multi-response-stimulus"></div>
+</body>
+<script type="text/javascript">
+
+var logo = ["img/logo.png"];
+
+var peronsl_code = ['<p style="font-weight:bold;">Please enter your personal username</p> <p> (The username is composed of 6 positions:</p> <p><i>Position 1</i>: First letter of your mother\'s forename,</p> <p><i>Position 2</i>: First letter of your father\'s forename,</p> <p><i>Positions 3-6</i>: Your year of birth,</p> <i>Example</i>: FC1984)</p>'];
+
+
+var welcome_message = {
+	type: "single-stim",
+	stimulus: logo,
+	is_html: false,
+	choices: [13],
+	timing_post_trial: 10,
+	prompt: "<p><b><h1>Willkommen</h1></b></p> <p>Bitte dr\u00fccken Sie Enter um zu starten</p>"
+};
+
+var demog_block ={
+	type: "survey-text",
+	questions: peronsl_code
+};
+
+var instruction_block = {
+	type: "text",
+	text: ['<p.large><b><h1>Instruktion</h1> </b></p><p.small>Liebe Teilnehmerin, lieber Teilnehmer!<br></p><p.small>Herzlichen Dank, dass Sie sich bereit erkl\u00e4rt haben, an dieser Studie teilzunehmen.<br></p><p.small> Anschlie\u00dfend werden Ihnen Wortlisten pr\u00e4sentiert, die <b>auswendig gelernt</b> und nach jedem Durchgang <b>laut wiederholt</b> werden sollen. Wichtig ist, dass die <b>Reihenfolge</b> der pr\u00e4sentierten W\u00f6rter auch beim lauten Reproduzieren eingehalten wird.<br></p><p.small>Bitte entscheiden Sie w\u00e4hrend der Lernphase f\u00fcr jedes Wort, ob es etwas lebendiges bezeichnet, oder nicht.</p><p.small>Handelt es sich um etwas lebendes dr\u00fccken Sie <b>j</b>, wenn nicht, dann <b>f</b>.</p><img src = "img/heart.png" style="width:90px;height:90px;"></p><p.small><b>Wenn sie alles gelesen und verstanden haben, dann dr\u00fccken Sie bitte eine Taste. Andernfalls steht Ihnen der / die VersuchsleiterIn gerne zur Verf\u00fcgung.</b></p>']
+};
+
+var instruction_reproduction = ['<p><h1>Bitte laut reproduzieren</h1></p><br><p>Zeit: <h2>30s</h2></p>', '<p><h1>Bitte laut reproduzieren</h1></p><br><p>Zeit: <h2>20s</h2></p>','<p><h1>Bitte laut reproduzieren</h1></p><br><p>Zeit: <h2>10s</h2></p>','<p><h1>Bitte laut reproduzieren</h1></p><br><p>Zeit: <h2>5s</h2></p>', '<p><h1>Bitte laut reproduzieren</h1></p><br><p>Zeit: <h2>1s</h2></p>'];
+
+//var heart = ["img/heart.png"];
+
+
+var reproduction30s = {
+		type:"multi-stim-multi-response",
+		stimuli: instruction_reproduction,
+		timing_stim: [10000, 10000, 5000, 4000, 1000],
+		is_html: true,
+		choices: [[70,74]],
+		prompt: ['<p><br><br><h1><img src="img/heart.png" style="width:130px;height:auto"><h1></p>'],
+		response_ends_trial: false,
+		timing_response: 31000
+}
+
+var listLead = {
+	type: 'text',
+
+	text: ['<p><h3>Bitte dr\u00fccken Sie </h3></p><br> <img src="img/enter.png"> </p><p><br> <h3> wenn Sie bereit f\u00fcr die n\u00e4chste Liste sind</h3><p>']
+}
+
+var fixation = {
+	type: "single-stim",
+	stimulus: ['<p"><h4 style="font-size:300%;"> + </h4></p>'],
+	is_html: true,
+	timing_response: 1000
+};
+
+
+// Funktion zum Ziehen von x Wortlisten mit y Items aus dem Pool
+function createLists(wordlistItems, listCount, itemCount){
+    var listOfLists = [];
+    for (var i = 0; i < listCount; i++) {
+        // create one random list
+        listOfLists.push(jsPsych.randomization.sample(wordlistItems, itemCount));
+    }
+    return listOfLists;
+
+}
+
+// Erzeuge solange 10 Listen a 12 Wörter bis keine Duplikate innerhalb der Listen vorkommen
+var res = 1;
+var count = 0;
+
+while (res != 0) {
+	var lists = createLists(wordlistItems, 10, 12);
+
+	var globalList = _.flatten(lists).map(function (item) {
+		return item.text;
+
+	});
+
+// JS string compare.
+// Nehme slice um Array zu klonen)
+	var sorted_arr = globalList.slice().sort();
+	var res = [];
+	for (var ii = 0; ii < globalList.length - 1; ii++) {
+		if (sorted_arr[ii + 1] == sorted_arr[ii]) {
+			res.push(sorted_arr[ii]);
+
+		}
+	}
+	if (res != 0) {
+
+		// während Entwicklungsphase zur Sicherheit Duplicate printen, wenn gefunden, sonst aber....
+		//alert(res.length + " Duplikate gefunden: " + res);
+		console.log(res.length);
+
+		count = count + 1;
+	}
+	//console.log(count)
+	//... mitteilen, dass keine Duplikate vorhanden sind
+	else { alert(count + " -mal generiert: keine Duplikate vorhanden")}
+}
+
+
+/*  überprüfen ob doppelt gezogen wurde, solange generieren bis das der Fall ist versuchen
+
+
+for (var i = 0, len = a.length; i < len; i++) {
+    for (var j = 0, len2 = b.length; j < len2; j++) {
+        if (a[i].name === b[j].name) {
+            b.splice(j, 1);
+            len2=b.length;
+        }
+    }
+}
+*/
+
+// Item timing
+var timing = [];
+for (var i = 0; i < 11; i++){
+	timing.push(1500)}
+
+
+// Erstelle Listen, Itemblöcke und Recallblöcke einzeln (Nachvollziehbarkeit)
+var listONE = _.flatten(lists[0]).map(function(item) {
+	return ('<h1>' + item.text + '</h1>') ;
+});
+
+var blockONE = {
+	type: 'multi-stim-multi-response',
+	stimuli: listONE,
+	is_html:true,
+	timing_stim: timing,
+	response_ends_trial: false,
+	timing_response: 12*timing[0],
+	choices: [[70,74]], // Y or N
+	prompt: ['']
+};
+/*
+var reproduction_blockONE = {
+	type: 'survey-text',
+	questions: ["Reproduktion  .... bla bla"],
+	rows: [12],
+	columns: [12]
+	//data: {responses: 'listONE'}
+};
+*/
+var listTWO = _.flatten(lists[1]).map(function(item) {
+    return ('<h1>' + item.text + '</h1>') ;
+});
+
+var blockTWO = {
+	type: 'multi-stim-multi-response',
+	stimuli: listTWO,
+	is_html:true,
+	timing_stim: timing,
+	response_ends_trial: false,
+	timing_response: 12*timing[0],
+	choices: [[70,74]], // Y or N
+	prompt: ['']
+};
+
+/*
+var reproduction_blockTWO = {
+	type: 'survey-text',
+	questions: ["Reproduktion  .... bla bla"],
+	rows: [12],
+	columns: [12]
+};
+*/
+
+var listTHREE = _.flatten(lists[2]).map(function(item) {
+	return ('<h1>' + item.text + '</h1>') ;
+});
+
+var blockTHREE = {
+	type: 'multi-stim-multi-response',
+	stimuli: listTHREE,
+	is_html:true,
+	timing_stim: timing,
+	response_ends_trial: false,
+	timing_response: 12*timing[0],
+	choices: [[70,74]], // Y or N
+	prompt: ['']
+};
+
+/*
+var reproduction_blockTHREE = {
+	type: 'survey-text',
+	questions: ["Reproduktion  .... bla bla"],
+	rows: [12],
+	columns: [12]
+};
+*/
+
+
+var listFOUR = _.flatten(lists[3]).map(function(item) {
+	return ('<h1>' + item.text + '</h1>') ;
+});
+
+var blockFOUR = {
+	type: 'multi-stim-multi-response',
+	stimuli: listFOUR,
+	is_html:true,
+	timing_stim: timing,
+	response_ends_trial: false,
+	timing_response: 12*timing[0],
+	choices: [[70,74]], // Y or N
+	prompt: ['']
+};
+
+/*
+var reproduction_blockFOUR = {
+	type: 'survey-text',
+	questions: ["Reproduktion  .... bla bla"],
+	rows: [12],
+	columns: [12]
+};
+*/
+
+var listFIVE = _.flatten(lists[4]).map(function(item) {
+	return ('<h1>' + item.text + '</h1>') ;
+});
+
+var blockFIVE = {
+	type: 'multi-stim-multi-response',
+	stimuli: listFIVE,
+	is_html:true,
+	timing_stim: timing,
+	response_ends_trial: false,
+	timing_response: 12*timing[0],
+	choices: [[70,74]], // Y or N
+	prompt: ['']
+};
+
+/*
+var reproduction_blockFIVE = {
+	type: 'survey-text',
+	questions: ["Reproduktion  .... bla bla"],
+	rows: [12],
+	columns: [12]
+};
+*/
+
+var listSIX = _.flatten(lists[5]).map(function(item) {
+	return ('<h1>' + item.text + '</h1>') ;
+});
+
+var blockSIX = {
+	type: 'multi-stim-multi-response',
+	stimuli: listSIX,
+	is_html:true,
+	timing_stim: timing,
+	response_ends_trial: false,
+	timing_response: 12*timing[0],
+	choices: [[70,74]], // Y or N
+	prompt: ['']
+};
+
+/*
+var reproduction_blockSIX = {
+	type: 'survey-text',
+	questions: ["Reproduktion  .... bla bla"],
+	rows: [12],
+	columns: [12]
+};
+*/
+
+var listSEVEN = _.flatten(lists[6]).map(function(item) {
+	return ('<h1>' + item.text + '</h1>') ;
+});
+
+var blockSEVEN = {
+	type: 'multi-stim-multi-response',
+	stimuli: listSEVEN,
+	is_html:true,
+	timing_stim: timing,
+	response_ends_trial: false,
+	timing_response: 12*timing[0],
+	choices: [[70,74]], // Y or N
+	prompt: ['']
+};
+
+/*
+var reproduction_blockSEVEN = {
+	type: 'survey-text',
+	questions: ["Reproduktion  .... bla bla"],
+	rows: [12],
+	columns: [12]
+};
+*/
+
+var listEIGHT = _.flatten(lists[7]).map(function(item) {
+	return ('<h1>' + item.text + '</h1>') ;
+});
+
+var blockEIGHT = {
+	type: 'multi-stim-multi-response',
+	stimuli: listEIGHT,
+	is_html:true,
+	timing_stim: timing,
+	response_ends_trial: false,
+	timing_response: 12*timing[0],
+	choices: [[70,74]], // Y or N
+	prompt: ['']
+};
+
+/*
+var reproduction_blockEIGHT = {
+	type: 'survey-text',
+	questions: ["Reproduktion  .... bla bla"],
+	rows: [12],
+	columns: [12]
+};
+*/
+
+var listNINE = _.flatten(lists[8]).map(function(item) {
+	return ('<h1>' + item.text + '</h1>') ;
+});
+
+var blockNINE = {
+	type: 'multi-stim-multi-response',
+	stimuli: listNINE,
+	is_html:true,
+	timing_stim: timing,
+	response_ends_trial: false,
+	timing_response: 12*timing[0],
+	choices: [[70,74]], // Y or N
+	prompt: ['']
+};
+
+/*
+var reproduction_blockNINE = {
+	type: 'survey-text',
+	questions: ["Reproduktion  .... bla bla"],
+	rows: [12],
+	columns: [12]
+};
+*/
+
+var listTEN = _.flatten(lists[9]).map(function(item) {
+	return ('<h1>' + item.text + '</h1>') ;
+});
+
+var blockTEN = {
+	type: 'multi-stim-multi-response',
+	stimuli: listTEN,
+	is_html:true,
+	timing_stim: timing,
+	response_ends_trial: false,
+	timing_response: 12*timing[0],
+	choices: [[70,74]], // Y or N
+	prompt: ['']
+};
+
+/*
+var reproduction_blockTEN = {
+	type: 'survey-text',
+	questions: ["Reproduktion  .... bla bla"],
+	rows: [12],
+	columns: [12]
+};
+*/
+
+var outro = {
+	type: 'text',
+	text: '<p> <h1><b>Herzlichen Dank !</b></h1></p><br><img src = img/smile.png style=(height: 30px,width: auto)>'
+
+};
+
+//Definiere Timeline
+var timeline =[
+		welcome_message,
+		instruction_block,
+		listLead,
+		fixation,
+		blockONE,
+		reproduction30s,
+		//reproduction_blockONE,
+		listLead,
+		fixation,
+		blockTWO,
+		reproduction30s,
+		//reproduction_blockTWO,
+		listLead,
+		fixation,
+		blockTHREE,
+		reproduction30s,
+		//reproduction_blockTHREE,
+		listLead,
+		fixation,
+		blockFOUR,
+		reproduction30s,
+		//reproduction_blockFOUR,
+		listLead,
+		fixation,
+		blockFIVE,
+		reproduction30s,
+		//reproduction_blockFIVE,
+		listLead,
+		fixation,
+		blockSIX,
+		reproduction30s,
+		//reproduction_blockSIX,
+		listLead,
+		fixation,
+		blockSEVEN,
+		reproduction30s,
+		//reproduction_blockSEVEN,
+		listLead,
+		fixation,
+		blockEIGHT,
+		reproduction30s,
+		//reproduction_blockEIGHT,
+		listLead,
+		fixation,
+		blockNINE,
+		reproduction30s,
+		//reproduction_blockNINE,
+		listLead,
+		fixation,
+		blockTEN,
+		reproduction30s,
+		//reproduction_blockTEN,
+		demog_block,
+		outro
+
+
+];
+
+
+/*
+var listTwo = [ ];
+for (var i = 0; i < 12; i++){
+	listOne.push(globalList[i]);
+	globalList.shift();
+	console.log(listTwo);
+	console.log(globalList);
+}
+console.log(listOne);
+
+
+for (var i = 0; i < 12; i++){
+    timeline.push(listOne[i]);
+}
+
+
+
+for (var i = 0; i < 12; i++){
+	timeline.push(listTwo[i]);
+}*/
+
+//var timeline = [];
+//timeline.unshift(listOne);
+//timeline.unshift(globalList);
+//console.log(timeline);
+//timeline.unshift(test);
+//console.log('listOfLists');
+//console.log(lists);
+//console.log(listOne);
+/*
+var test_block = {
+    type: 'single-stim',
+    stimuli: ['a','b', 'c'],
+    is_html: true,
+    timing_stim: 2000
+};
+*/
+/*
+var wordsequence_block = {
+    type: 'wordlist',
+    items: itemStorage,
+    timing_stim: 2000,
+    evaluate_block: true
+};
+
+var debrief_block = {
+	type: "text",
+	text: [debrief]
+};
+
+var ext = [
+	['Socializing']
+];
+
+var singlestim = {
+    type:'single-stim',
+    stimulus: '<h1>mama</h1>',
+    is_html: true,
+    timing_stim: 2000,
+}
+
+*/
+
+
+
+jsPsych.init({
+	display_element: $("#jspsych_target"),
+	timeline: timeline,
+	show_progress_bar: true,
+	fullscreen: true,
+
+	on_finish: function (data) {
+		//var code = jsPsych.data.dataAsJSON();
+		var name = jsPsych.data.getLastTimelineData();
+		console.log(name[2]);
+		var subjID = name[2];
+		console.log(subjID.responses);
+
+
+		jsPsych.data.localSave('WMC_SubjectID_' + subjID.responses + '.txt', 'csv');
+		//jsPsych.data.displayData('csv');
+	}
+});
+  /*      $('#jspsych_target').append($('<pre>', {
+            html:jsPsych.dataAsCSV()//
+            //html: JSON.stringify(data,undefined,2)
+        }));
+        //jsPsych.saveCSVdata("WAT_t2_data.txt");
+        ext = JSON.stringify(data[[2]],undefined,2);
+        jsPsych.saveCSVdata("WAT_t2_" + ext.slice(88,94) + ".txt");
+*/
+    //}
+
+</script>
+
+
+</html>

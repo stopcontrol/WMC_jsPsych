@@ -1,2 +1,2 @@
-# WMC_jsPsych
-A JS paradigma to assess working memory capacity with wordlists and semantic tasks
+# WMC_paradigm
+A paradigm to assess working memory capacity using wordlists combined with semantic tasks
